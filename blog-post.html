@@ -129,14 +129,14 @@
             max-width: 580px;
         }
 
-        .hero-image {
-            margin-top: 1.5rem;
+        .article-image {
+            margin-bottom: 2rem;
             border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
         }
 
-        .hero-image img {
+        .article-image img {
             width: 100%;
             height: auto;
             display: block;
@@ -497,10 +497,6 @@
             <h1 id="hero-title">Loading...</h1>
             <p class="subtitle" id="hero-subtitle">Loading...</p>
 
-            <div class="hero-image">
-                <img src="og-image.png" alt="The Authority Problem: Why Claude's Skills Fail - Visual showing skill instructions being placed in the wrong location">
-            </div>
-
             <div class="author-hero">
                 <img class="author-avatar" src="https://avatars.githubusercontent.com/u/191285891?v=4" alt="John Renaldi">
                 <div class="author-info">
@@ -512,6 +508,10 @@
     </header>
 
     <article>
+        <div class="article-image">
+            <img src="og-image.png" alt="The Authority Problem: Why Claude's Skills Fail - Visual showing skill instructions being placed in the wrong location">
+        </div>
+
         <div id="content" class="loading">
             <p>Loading content...</p>
         </div>
