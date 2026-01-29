@@ -6,106 +6,82 @@
     <title>Skills Aren't Broken, Claude Code's Implementation Is | Claude Code Skills Research</title>
     <meta name="description" content="Vercel's research shows skills achieve just a 53% pass rate. The surprisingly simple reason? Someone put the instructions in the wrong place.">
 
-    <!-- Typography -->
+    <!-- Typography - Inter for clean modern look -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,900;1,9..144,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
     <!-- Marked.js for markdown parsing -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <style>
         :root {
-            --ink: #0f0f14;
-            --paper: #faf9f7;
-            --paper-dark: #f0eeea;
-            --text: #1c1c21;
-            --text-soft: #5c5c66;
-            --amber: #d97706;
-            --amber-glow: #fbbf24;
-            --amber-soft: #fef3c7;
-            --danger: #dc2626;
-            --danger-soft: #fee2e2;
-            --success: #059669;
-            --success-soft: #d1fae5;
-            --code-bg: #1e1b2e;
-            --code-text: #e2dff4;
+            --bg: #ffffff;
+            --bg-subtle: #f8f9fa;
+            --bg-muted: #f1f3f4;
+            --text: #1a1a2e;
+            --text-secondary: #6b7280;
+            --text-muted: #9ca3af;
+            --border: #e5e7eb;
+            --accent: #6366f1;
+            --accent-light: #818cf8;
+            --accent-bg: #eef2ff;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+            --code-comment: #6c7086;
+            --code-keyword: #cba6f7;
+            --code-string: #a6e3a1;
+            --code-function: #89b4fa;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html { scroll-behavior: smooth; }
 
         body {
-            font-family: 'Source Serif 4', Georgia, serif;
-            background: var(--paper);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
             color: var(--text);
-            line-height: 1.75;
-            font-size: 19px;
+            line-height: 1.7;
+            font-size: 17px;
+            -webkit-font-smoothing: antialiased;
         }
 
         /* Hero Section */
         .hero {
-            background: var(--ink);
-            color: var(--paper);
-            padding: 6rem 2rem 5rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background:
-                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(217, 119, 6, 0.15), transparent),
-                radial-gradient(ellipse 60% 40% at 80% 100%, rgba(217, 119, 6, 0.1), transparent);
-            pointer-events: none;
+            background: linear-gradient(180deg, var(--bg-subtle) 0%, var(--bg) 100%);
+            padding: 5rem 2rem 4rem;
+            border-bottom: 1px solid var(--border);
         }
 
         .hero-content {
-            max-width: 900px;
+            max-width: 800px;
             margin: 0 auto;
-            position: relative;
-            z-index: 1;
-            animation: fadeInUp 0.8s ease-out;
         }
 
         .hero-eyebrow {
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.75rem;
+            font-size: 0.8rem;
+            font-weight: 500;
             text-transform: uppercase;
-            letter-spacing: 0.2em;
-            color: var(--amber);
+            letter-spacing: 0.1em;
+            color: var(--accent);
             margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .hero-eyebrow::before {
-            content: '';
-            width: 2rem;
-            height: 1px;
-            background: var(--amber);
         }
 
         .hero h1 {
-            font-family: 'Fraunces', serif;
-            font-size: clamp(2.5rem, 6vw, 4rem);
-            font-weight: 900;
-            line-height: 1.1;
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 700;
+            line-height: 1.2;
             letter-spacing: -0.03em;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text);
         }
 
         .hero .subtitle {
-            font-family: 'Fraunces', serif;
-            font-size: 1.35rem;
-            font-weight: 300;
-            font-style: italic;
-            color: rgba(250, 249, 247, 0.7);
-            line-height: 1.5;
-            max-width: 680px;
+            font-size: 1.2rem;
+            font-weight: 400;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            max-width: 640px;
         }
 
         /* Author Section in Hero */
@@ -115,61 +91,47 @@
             gap: 1rem;
             margin-top: 2rem;
             padding-top: 1.5rem;
-            border-top: 1px solid rgba(250, 249, 247, 0.15);
+            border-top: 1px solid var(--border);
         }
 
         .author-avatar {
             width: 48px;
             height: 48px;
             border-radius: 50%;
-            border: 2px solid var(--amber);
             object-fit: cover;
         }
 
-        .author-info { display: flex; flex-direction: column; }
+        .author-info { display: flex; flex-direction: column; gap: 0.15rem; }
 
         .author-name {
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.9rem;
-            font-weight: 500;
-            color: var(--paper);
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text);
         }
 
         .author-role {
-            font-size: 0.75rem;
-            color: rgba(250, 249, 247, 0.6);
+            font-size: 0.8rem;
+            color: var(--text-secondary);
         }
 
         /* Main Article */
         article {
             max-width: 720px;
             margin: 0 auto;
-            padding: 4rem 1.5rem;
+            padding: 3rem 1.5rem;
         }
 
         /* Rendered Markdown Styles */
         #content h2 {
-            font-family: 'Fraunces', serif;
-            font-size: 2rem;
-            font-weight: 600;
+            font-size: 1.75rem;
+            font-weight: 700;
             letter-spacing: -0.02em;
-            margin: 4rem 0 1.5rem;
-            position: relative;
-        }
-
-        #content h2::after {
-            content: '';
-            display: block;
-            width: 3rem;
-            height: 3px;
-            background: var(--amber);
-            margin-top: 0.75rem;
-            border-radius: 2px;
+            margin: 3.5rem 0 1.25rem;
+            color: var(--text);
         }
 
         #content h3 {
-            font-family: 'Fraunces', serif;
-            font-size: 1.35rem;
+            font-size: 1.25rem;
             font-weight: 600;
             margin: 2.5rem 0 1rem;
             color: var(--text);
@@ -177,6 +139,7 @@
 
         #content p {
             margin-bottom: 1.5rem;
+            color: var(--text-secondary);
         }
 
         #content strong {
@@ -188,121 +151,124 @@
             font-style: italic;
         }
 
-        /* TL;DR Section - special styling for first blockquote-like content after TL;DR header */
+        /* TL;DR Box */
         .tldr-box {
-            background: linear-gradient(135deg, var(--amber-soft), var(--paper));
-            border: 1px solid var(--amber);
-            border-left: 4px solid var(--amber);
-            border-radius: 0 16px 16px 0;
-            padding: 2rem;
-            margin: 0 -1rem 3rem;
-            position: relative;
-            animation: fadeInUp 0.8s ease-out 0.2s both;
+            background: var(--accent-bg);
+            border: 1px solid var(--accent);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 0 0 2.5rem;
         }
 
         .tldr-box::before {
             content: 'TL;DR';
-            position: absolute;
-            top: -0.75rem;
-            left: 1.5rem;
-            background: var(--amber);
-            color: white;
-            font-family: 'IBM Plex Mono', monospace;
+            display: block;
             font-size: 0.7rem;
-            font-weight: 500;
-            padding: 0.25rem 0.75rem;
-            border-radius: 4px;
+            font-weight: 600;
+            text-transform: uppercase;
             letter-spacing: 0.1em;
+            color: var(--accent);
+            margin-bottom: 0.75rem;
         }
 
         .tldr-box p {
             margin: 0;
-            font-size: 1.05rem;
+            color: var(--text);
+            font-size: 0.95rem;
         }
 
         /* Blockquotes */
         #content blockquote {
-            font-family: 'Source Serif 4', Georgia, serif;
             font-size: 1rem;
             font-style: italic;
-            color: var(--text-soft);
+            color: var(--text-secondary);
             margin: 1.5rem 0;
             padding: 1rem 1.5rem;
-            border-left: 3px solid var(--amber);
-            background: var(--paper-dark);
+            border-left: 3px solid var(--accent);
+            background: var(--bg-subtle);
             border-radius: 0 8px 8px 0;
         }
 
         #content blockquote p {
             margin: 0;
-            line-height: 1.6;
+            color: var(--text-secondary);
         }
 
-        /* Code */
+        /* Inline Code */
         #content code {
-            font-family: 'IBM Plex Mono', monospace;
+            font-family: 'JetBrains Mono', monospace;
             font-size: 0.85em;
-            background: var(--code-bg);
-            color: var(--code-text);
-            padding: 0.2em 0.5em;
+            background: var(--bg-muted);
+            color: var(--text);
+            padding: 0.2em 0.4em;
             border-radius: 4px;
         }
 
+        /* macOS-style Code Blocks */
         #content pre {
             background: var(--code-bg);
-            color: var(--code-text);
-            padding: 1.5rem;
             border-radius: 12px;
-            overflow-x: auto;
+            overflow: hidden;
             margin: 2rem 0;
-            font-size: 0.85rem;
-            line-height: 1.6;
-            position: relative;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
 
         #content pre::before {
             content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--amber), var(--amber-glow));
-            border-radius: 12px 12px 0 0;
+            display: block;
+            padding: 12px 16px;
+            background: #313244;
+            border-bottom: 1px solid #45475a;
+            background-image: url("data:image/svg+xml,%3Csvg width='54' height='14' viewBox='0 0 54 14' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='7' cy='7' r='5' fill='%23ff5f57'/%3E%3Ccircle cx='27' cy='7' r='5' fill='%23febc2e'/%3E%3Ccircle cx='47' cy='7' r='5' fill='%2328c840'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: 16px center;
         }
 
         #content pre code {
+            display: block;
+            padding: 1.25rem 1.5rem;
             background: none;
-            padding: 0;
-            font-size: inherit;
+            color: var(--code-text);
+            font-size: 0.875rem;
+            line-height: 1.6;
+            overflow-x: auto;
         }
 
         /* Tables */
         #content table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             margin: 2rem 0;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
         }
 
         #content th {
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.7rem;
-            font-weight: 500;
+            font-size: 0.75rem;
+            font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--text-soft);
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
             text-align: left;
-            padding: 1rem;
-            border-bottom: 2px solid var(--ink);
+            padding: 0.875rem 1rem;
+            background: var(--bg-subtle);
+            border-bottom: 1px solid var(--border);
         }
 
         #content td {
-            padding: 1rem;
-            border-bottom: 1px solid var(--paper-dark);
-            vertical-align: top;
+            padding: 0.875rem 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        #content tr:last-child td {
+            border-bottom: none;
         }
 
         #content tr:hover td {
-            background: var(--paper-dark);
+            background: var(--bg-subtle);
         }
 
         /* Lists */
@@ -312,75 +278,49 @@
         }
 
         #content li {
-            margin-bottom: 0.75rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
         }
 
         #content li::marker {
-            color: var(--amber);
+            color: var(--accent);
         }
 
         /* Horizontal Rules */
         #content hr {
             border: none;
             height: 1px;
-            background: linear-gradient(90deg, transparent, var(--text-soft), transparent);
+            background: var(--border);
             margin: 3rem 0;
-            opacity: 0.3;
         }
 
         /* Links */
         #content a {
-            color: var(--amber);
-            text-decoration: underline;
-            text-decoration-color: rgba(217, 119, 6, 0.3);
-            transition: text-decoration-color 0.2s;
+            color: var(--accent);
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.2s;
         }
 
         #content a:hover {
-            text-decoration-color: var(--amber);
-        }
-
-        /* Author Note / Footer */
-        .author-note {
-            background: var(--ink);
-            color: var(--paper);
-            padding: 3rem 2rem;
-            margin: 4rem -1.5rem -4rem;
-            text-align: center;
-        }
-
-        .author-note h4 {
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 0.2em;
-            color: var(--amber);
-            margin-bottom: 1rem;
-        }
-
-        .author-note p {
-            font-size: 0.95rem;
-            color: rgba(250, 249, 247, 0.7);
-            max-width: 600px;
-            margin: 0 auto 1rem;
+            border-bottom-color: var(--accent);
         }
 
         /* About Author Footer */
         .about-author {
-            background: linear-gradient(135deg, var(--ink), #1a1a24);
-            color: var(--paper);
-            padding: 3rem 2rem;
-            margin: 2rem -1.5rem -4rem;
-            border-top: 1px solid rgba(250, 249, 247, 0.1);
+            background: var(--bg-subtle);
+            padding: 2.5rem 2rem;
+            margin: 3rem -1.5rem -3rem;
+            border-top: 1px solid var(--border);
         }
 
         .about-author h4 {
-            font-family: 'IBM Plex Mono', monospace;
             font-size: 0.7rem;
+            font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.2em;
-            color: var(--amber);
-            margin-bottom: 1.5rem;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-bottom: 1.25rem;
         }
 
         .about-author-content {
@@ -390,10 +330,9 @@
         }
 
         .about-author-avatar {
-            width: 80px;
-            height: 80px;
+            width: 72px;
+            height: 72px;
             border-radius: 50%;
-            border: 3px solid var(--amber);
             object-fit: cover;
             flex-shrink: 0;
         }
@@ -403,28 +342,30 @@
         }
 
         .about-author-bio p {
-            font-size: 0.95rem;
-            color: rgba(250, 249, 247, 0.8);
+            font-size: 0.9rem;
+            color: var(--text-secondary);
             line-height: 1.7;
             margin-bottom: 0;
         }
 
         .about-author-bio strong {
-            color: var(--paper);
+            color: var(--text);
+            font-weight: 600;
         }
 
         .author-social {
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
-            color: var(--amber);
+            gap: 0.4rem;
+            color: var(--accent);
             text-decoration: none;
             font-size: 0.85rem;
-            margin-right: 1.5rem;
+            font-weight: 500;
+            margin-right: 1.25rem;
             transition: opacity 0.2s;
         }
 
-        .author-social:hover { opacity: 0.8; }
+        .author-social:hover { opacity: 0.7; }
 
         .author-social svg {
             width: 16px;
@@ -435,25 +376,16 @@
         .loading {
             text-align: center;
             padding: 4rem;
-            color: var(--text-soft);
-        }
-
-        /* Animations */
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            color: var(--text-muted);
         }
 
         /* Responsive */
         @media (max-width: 600px) {
-            body { font-size: 17px; }
-            .hero { padding: 4rem 1.5rem 3rem; }
-            #content h2 { font-size: 1.65rem; }
-            #content blockquote {
-                font-size: 0.95rem;
-                margin: 1.5rem 0;
-                padding: 1rem;
-            }
+            body { font-size: 16px; }
+            .hero { padding: 3rem 1.5rem 2.5rem; }
+            .hero h1 { font-size: 1.75rem; }
+            #content h2 { font-size: 1.5rem; }
+            #content pre code { font-size: 0.8rem; padding: 1rem; }
             .about-author-content {
                 flex-direction: column;
                 align-items: center;
@@ -468,8 +400,7 @@
         }
 
         @media print {
-            .hero { background: white; color: black; padding: 2rem 0; }
-            .hero::before { display: none; }
+            .hero { background: white; }
             #content pre { break-inside: avoid; }
         }
     </style>
@@ -486,7 +417,7 @@
                 <div class="author-info">
                     <span class="author-name">John Renaldi</span>
                     <span class="author-role">Professor · Northwestern Segal Design Institute (MMM & MPD)</span>
-                    <a href="mailto:jrenaldi@northwestern.edu" style="font-size: 0.75rem; color: var(--amber); text-decoration: none;">jrenaldi@northwestern.edu</a>
+                    <a href="mailto:jrenaldi@northwestern.edu" style="font-size: 0.75rem; color: var(--accent); text-decoration: none;">jrenaldi@northwestern.edu</a>
                 </div>
             </div>
         </div>
@@ -507,14 +438,14 @@
                     <p style="margin-top: 1rem;">
                         <a href="https://linkedin.com/in/renaldi" target="_blank" class="author-social">
                             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-                            Connect on LinkedIn
+                            LinkedIn
                         </a>
                         <a href="https://github.com/jrenaldi79/skills-research" target="_blank" class="author-social">
                             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-                            View Repository
+                            Repository
                         </a>
                     </p>
-                    <p style="margin-top: 1rem; font-size: 0.85rem; color: rgba(250, 249, 247, 0.5);"><em>No affiliation with Anthropic, Vercel, or OpenRouter. This research was conducted independently.</em></p>
+                    <p style="margin-top: 1rem; font-size: 0.8rem; color: var(--text-muted);"><em>No affiliation with Anthropic, Vercel, or OpenRouter. This research was conducted independently.</em></p>
                 </div>
             </div>
         </div>
@@ -572,7 +503,7 @@
             } catch (error) {
                 console.error('Failed to load blog-post.md:', error);
                 document.getElementById('content').innerHTML = `
-                    <p style="color: var(--danger);">
+                    <p style="color: #dc2626;">
                         Failed to load content. Make sure blog-post.md is in the same directory.
                         <br><br>
                         Error: ${error.message}
