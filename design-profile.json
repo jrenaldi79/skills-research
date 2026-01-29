@@ -1,0 +1,109 @@
+{
+  "name": "Tech-Forward Editorial",
+  "description": "Clean, modern tech aesthetic with subtle developer influences. Professional yet approachable, balancing technical credibility with readability.",
+
+  "color_palette": {
+    "primary": {
+      "background": "#fafafa",
+      "background_alt": "#f4f4f5",
+      "code_background": "#18181b"
+    },
+    "text": {
+      "primary": "#18181b",
+      "secondary": "#52525b",
+      "muted": "#a1a1aa"
+    },
+    "accent": {
+      "main": "#0891b2",
+      "light": "#22d3ee",
+      "description": "Cyan/teal - modern, tech-forward, trustworthy"
+    },
+    "semantic": {
+      "success": "#16a34a",
+      "warning": "#dc2626",
+      "info": "#0ea5e9",
+      "border": "#e4e4e7"
+    },
+    "code_syntax": {
+      "keywords": "#a78bfa",
+      "strings": "#34d399",
+      "numbers": "#fbbf24",
+      "functions": "#60a5fa",
+      "comments": "#71717a"
+    }
+  },
+
+  "typography": {
+    "headings": {
+      "font_family": "Space Grotesk",
+      "weight": "600-700",
+      "style": "Geometric sans-serif with technical character"
+    },
+    "body": {
+      "font_family": "Space Grotesk",
+      "weight": "400-500",
+      "line_height": 1.7,
+      "size": "17px"
+    },
+    "code_and_ui": {
+      "font_family": "JetBrains Mono",
+      "weight": "400-500",
+      "style": "Monospace for code, labels, technical elements"
+    }
+  },
+
+  "visual_elements": {
+    "grid_pattern": {
+      "enabled": true,
+      "size": "32px",
+      "color": "rgba(8, 145, 178, 0.03)",
+      "description": "Subtle tech grid overlay on backgrounds"
+    },
+    "code_blocks": {
+      "style": "macOS terminal",
+      "features": ["Traffic light buttons (red/yellow/green)", "Dark background", "Rounded corners (8px)"],
+      "shadow": "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
+    },
+    "borders": {
+      "radius": "6-8px",
+      "color": "#e4e4e7",
+      "style": "Clean, minimal"
+    },
+    "eyebrow_text": {
+      "style": "// prefix (code comment style)",
+      "font": "JetBrains Mono",
+      "transform": "uppercase",
+      "letter_spacing": "0.1em"
+    }
+  },
+
+  "mood_and_tone": {
+    "overall": "Professional technical documentation meets editorial design",
+    "keywords": [
+      "clean",
+      "modern",
+      "technical",
+      "trustworthy",
+      "developer-friendly",
+      "minimal",
+      "precise",
+      "light with dark accents"
+    ],
+    "avoid": [
+      "flashy gradients",
+      "excessive decoration",
+      "dark/gloomy themes",
+      "corporate/generic",
+      "cluttered layouts"
+    ]
+  },
+
+  "image_generation_prompt": "Clean, modern tech aesthetic. Light gray (#fafafa) background with subtle cyan (#0891b2) accents. Geometric sans-serif typography (like Space Grotesk). Minimal, professional style with developer/code influences. Think technical documentation meets editorial design. Subtle grid pattern overlay. macOS-style UI elements. No dark mode. No gradients. Sharp, precise lines. Light theme with occasional dark code blocks.",
+
+  "style_references": [
+    "Vercel documentation",
+    "Linear app interface",
+    "Stripe developer docs",
+    "GitHub code review UI"
+  ]
+}

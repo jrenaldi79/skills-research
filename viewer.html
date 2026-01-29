@@ -19,9 +19,9 @@
             --text: #e8e8e8;
             --text-dim: #666666;
             --text-muted: #444444;
-            --accent: #00ff88;
-            --accent-dim: #00cc6a;
-            --accent-glow: rgba(0, 255, 136, 0.15);
+            --accent: #22d3ee;
+            --accent-dim: #0891b2;
+            --accent-glow: rgba(8, 145, 178, 0.15);
             --danger: #ff3366;
             --danger-dim: #cc2952;
             --danger-glow: rgba(255, 51, 102, 0.15);
@@ -378,7 +378,7 @@
             transition: width 0.2s;
         }
 
-        .api-section.system .size-fill { background: var(--accent); }
+        .api-section.system .size-fill { background: #22d3ee; }
         .api-section.tools .size-fill { background: var(--info); }
         .api-section.messages .size-fill { background: var(--warning); }
         .api-section.messages-injection .size-fill { background: var(--danger); }
@@ -439,7 +439,7 @@
             transition: width 0.2s;
         }
 
-        .authority-bar.system .authority-meter-fill { background: var(--accent); width: 100%; }
+        .authority-bar.system .authority-meter-fill { background: #22d3ee; width: 100%; }
         .authority-bar.tools .authority-meter-fill { background: var(--info); width: 70%; }
         .authority-bar.skills .authority-meter-fill { background: var(--danger); width: 35%; animation: pulse 2s infinite; }
         .authority-bar.results .authority-meter-fill { background: var(--warning); width: 20%; }
@@ -585,8 +585,8 @@
             word-break: break-word;
         }
 
-        .syn-key { color: #88ddff; }
-        .syn-str { color: var(--accent); }
+        .syn-key { color: #67e8f9; }
+        .syn-str { color: #34d399; }
         .syn-num { color: var(--warning); }
         .syn-comment { color: var(--text-dim); opacity: 0.7; }
 
@@ -1028,8 +1028,8 @@ Available skills:
                             </div>
                         </div>
 
-                        <div style="margin-top: 1.5rem; padding: 1rem; background: var(--accent-glow); border: 1px solid var(--accent-dim); border-radius: 5px;">
-                            <div style="font-size: 0.75rem; color: var(--accent); margin-bottom: 0.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em;">Solution</div>
+                        <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(8, 145, 178, 0.15); border: 1px solid #0891b2; border-radius: 5px;">
+                            <div style="font-size: 0.75rem; color: #22d3ee; margin-bottom: 0.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em;">Solution</div>
                             <div style="font-size: 0.7rem; color: var(--text-dim); line-height: 1.6;">
                                 Move skill instructions to the <strong>system prompt</strong> at initialization, not as user messages on invocation. This gives skills the authority level they need for 100% compliance.
                             </div>
