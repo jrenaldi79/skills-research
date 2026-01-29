@@ -332,6 +332,76 @@ Messages Array
 | Context cost | Accumulates in history | Removed when done |
 | Cache efficiency | Poor (in messages) | Good (ephemeral cache) |
 
+---
+
+## Implementation Considerations: Cache & Context Management
+
+There's an obvious objection to dynamic system prompt injection: "Won't that bust the cache?"
+
+Yes. And no. It depends on how you structure it.
+
+### How Anthropic's Cache Actually Works
+
+Anthropic's prompt caching is **prefix-based**. Content is cached from the beginning of the system prompt up to each `cache_control` breakpoint. If you change anything, content *after* that point is invalidated—but content *before* it stays cached.
+
+This means architecture matters:
+
+```
+[Core Claude Code instructions - 50k tokens]  ← ALWAYS CACHED
+[cache_control breakpoint]
+[Skill metadata - 2k tokens]                  ← Cached separately
+[cache_control breakpoint]  
+[Active skill content - 15k tokens]           ← Can change without busting above
+[cache_control breakpoint]
+```
+
+If you put skills **at the end** of the system prompt with their own cache breakpoint, swapping skills only invalidates the skill portion. The core instructions (the bulk of the tokens) remain cached.
+
+### The Tradeoff Is Worth It
+
+Current implementation: No cache benefit for skills (they're in user messages) + 53% compliance.
+
+Proposed implementation: Core instructions stay cached + skill portion may invalidate on swap + ~100% compliance.
+
+That's not a hard choice. You're trading partial cache invalidation for a 47-point improvement in pass rate.
+
+### The Harder Problem: When to Retire a Skill
+
+This is where it gets interesting. If skills live in the system prompt, when do you remove them? This isn't just a cache question—it's a **context window** question.
+
+A single skill can be 10-20k tokens. If a user activates three skills in a session, you're looking at 30-60k tokens of skill instructions competing with actual conversation for context space. That's not sustainable.
+
+**Proposed Retirement Logic:**
+
+1. **Explicit deactivation.** User says "I'm done with PDF stuff" or invokes a different skill that's clearly unrelated.
+
+2. **Task completion signal.** The model indicates the skill-related task is complete. This could be explicit ("Your PDF has been created") or implicit (conversation moves to unrelated topic for N turns).
+
+3. **Context budget threshold.** This is the interesting one. The orchestration layer should track what percentage of the context window is consumed by active skills. When it crosses a threshold (say, 15-20%), start pruning.
+
+**Pruning Priority:**
+- Oldest activated skill first (LRU)
+- Skills not referenced in the last N messages
+- Skills with lower relevance scores to recent conversation
+
+4. **Graceful degradation.** When a skill is retired, don't just delete it. Move its metadata back to the "available but not active" list. The model still knows the skill exists and can re-activate it if needed.
+
+### Open Questions
+
+This framework raises questions that need empirical testing:
+
+- **Optimal threshold:** What's the right context budget for skills? 10%? 20%? Probably depends on the task complexity.
+
+- **Re-activation cost:** If a skill gets pruned and immediately re-activated, you've wasted tokens. How do you predict skill stickiness?
+
+- **Multi-skill interactions:** Some tasks legitimately need multiple skills active simultaneously (PDF extraction → Excel analysis → PowerPoint presentation). How do you handle skill chains without blowing the budget?
+
+- **Cache warming:** When you know a skill is likely needed (based on file types in the workspace, recent conversation patterns), should you preemptively inject it to warm the cache?
+
+These aren't blockers. They're implementation details that require tuning. The core architecture—skills in system prompt with intelligent lifecycle management—is sound. The specifics need experimentation.
+
+---
+
 ### The Simple Truth
 
 This isn't rocket science. I'm not proposing new ML architectures or retrieval systems. I'm proposing:
