@@ -1,0 +1,117 @@
+{
+  "research_summary": {
+    "date": "2026-01-28",
+    "log_source": "/Users/john_renaldi/.claude-code-router/logs/ccr-20260128195650.log",
+    "analysis_tool": "Claude Code Router (ccr)"
+  },
+  "findings": {
+    "skill_metadata_location": {
+      "component": "tools array → Skill tool description",
+      "approximate_size_kb": 12,
+      "authority_level": "medium",
+      "always_visible": true,
+      "sample_content": "Available skills:\n- anthropic-skills:xlsx: Use this skill any time a spreadsheet file is the primary input or output...\n- anthropic-skills:pdf: Use this skill whenever the user wants to do anything with PDF files...\n- anthropic-skills:pptx: Presentation creation, editing, and analysis...\n- anthropic-skills:docx: Comprehensive document creation, editing, and analysis..."
+    },
+    "skill_content_location": {
+      "component": "messages array → user message (after Skill tool invocation)",
+      "approximate_size_kb": 18,
+      "authority_level": "low",
+      "always_visible": false,
+      "requires_tool_invocation": true,
+      "sample_content": "<system-reminder>\nThe \"pdf\" skill is now active.\nBase directory for this skill: /sessions/.../mnt/.skills/skills/pdf\n</system-reminder>\n\n# PDF Processing Skill\n\n## Overview\nThis skill enables comprehensive PDF manipulation..."
+    },
+    "system_prompt_location": {
+      "component": "system array",
+      "approximate_size_kb": 150,
+      "authority_level": "highest",
+      "contains_skill_content": false,
+      "uses_caching": true,
+      "cache_type": "ephemeral"
+    }
+  },
+  "api_request_structure": {
+    "system": {
+      "description": "Array of text blocks with cache_control",
+      "block_count": "3-4 typically",
+      "contains_skills": false
+    },
+    "tools": {
+      "description": "Array of tool definitions",
+      "tool_count": "~80 tools",
+      "skill_tool_present": true,
+      "skill_tool_description_contains": "Available skills list with summaries"
+    },
+    "messages": {
+      "description": "Conversation history array",
+      "skill_content_injected_as": "user role message after Skill tool_use"
+    }
+  },
+  "prompt_authority_hierarchy": [
+    {
+      "level": 1,
+      "name": "System Prompt",
+      "authority": "highest",
+      "model_treatment": "Core directives, always followed"
+    },
+    {
+      "level": 2,
+      "name": "Tool Description",
+      "authority": "medium-high",
+      "model_treatment": "Instructions for tool usage"
+    },
+    {
+      "level": 3,
+      "name": "User Message",
+      "authority": "lower",
+      "model_treatment": "Input to process, may be questioned",
+      "note": "THIS IS WHERE SKILL CONTENT LANDS"
+    },
+    {
+      "level": 4,
+      "name": "Tool Result",
+      "authority": "lowest",
+      "model_treatment": "Data to incorporate"
+    }
+  ],
+  "vercel_research": {
+    "source_url": "https://vercel.com/blog/agents-md-outperforms-skills-in-our-agent-evals",
+    "results": {
+      "agents_md": {
+        "placement": "system prompt",
+        "pass_rate": "100%",
+        "improvement_over_baseline": "+47%"
+      },
+      "skills_default": {
+        "placement": "tool invocation → user message",
+        "pass_rate": "53%",
+        "improvement_over_baseline": "0%"
+      },
+      "no_instructions": {
+        "placement": "none",
+        "pass_rate": "53%",
+        "improvement_over_baseline": "baseline"
+      }
+    },
+    "key_insight": "Placement in system prompt is the critical factor, not compression or semantic search"
+  },
+  "recommendations": [
+    {
+      "priority": 1,
+      "action": "Move skill metadata to system prompt",
+      "rationale": "Ensures model always knows available skills without tool invocation",
+      "expected_impact": "Skills become visible on every turn"
+    },
+    {
+      "priority": 2,
+      "action": "Use Read tool for skill content instead of user message injection",
+      "rationale": "Tool results have slightly higher authority than user messages",
+      "expected_impact": "Better compliance with skill instructions"
+    },
+    {
+      "priority": 3,
+      "action": "Remove the tool invocation decision point",
+      "rationale": "Model should not need to 'decide' to see skill information",
+      "expected_impact": "100% skill visibility when relevant"
+    }
+  ]
+}

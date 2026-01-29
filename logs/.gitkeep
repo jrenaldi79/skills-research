@@ -1,0 +1,12 @@
+# Log Files Directory
+
+Place your Claude Code Router log files here.
+
+The Claude Skill Inspector tool (viewer.html) can load and parse:
+- `.log` files from ccr (Claude Code Router)
+- `.json` files with parsed research data
+- `.jsonl` files with raw API request logs
+
+Example log file names:
+- ccr-20260128195650.log
+- parsed_output.json
