@@ -377,7 +377,7 @@ Sometimes the most impactful fixes aren't architectural overhauls or ML breakthr
 
 ## Methodology Note
 
-This research was conducted by intercepting Claude Code API traffic using Claude Code Router, an open-source proxy. Log analysis was performed on requests routed through OpenRouter to enable full payload inspection. All findings are reproducible using the tools and methodology documented in our [research repository](#).
+This research was conducted by intercepting Claude Code API traffic using Claude Code Router, an open-source proxy. Log analysis was performed on requests routed through OpenRouter to enable full payload inspection. All findings are reproducible using the tools and methodology documented in our [research repository](https://github.com/jrenaldi79/skills-research).
 
 ---
 

@@ -1,0 +1,13 @@
+# Social media posts (don't push to repo)
+linkedin-post.md
+
+# Personal/private content
+linkedin_persona.json
+john-renaldi-linkedin-content.md
+
+# System files
+.DS_Store
+
+# Logs (keep structure, not content)
+logs/*
+!logs/.gitkeep

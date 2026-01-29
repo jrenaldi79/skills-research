@@ -7,6 +7,8 @@
     <meta name="description" content="Research into Claude Code's skill architecture: why skills achieve only 53% compliance and how to fix it.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,900&family=Source+Serif+4:opsz,wght@8..60,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Marked.js for markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         :root {
             --ink: #0f0f14;
@@ -146,6 +148,11 @@
             margin-top: 0.25rem;
         }
 
+        /* Loading state */
+        .loading {
+            opacity: 0.5;
+        }
+
         @media (max-width: 500px) {
             .links { flex-direction: column; }
             .stats { flex-direction: column; gap: 1.5rem; }
@@ -155,8 +162,8 @@
 <body>
     <div class="container">
         <div class="eyebrow">Skills Research</div>
-        <h1>The Case of the Misplaced Instructions</h1>
-        <p class="subtitle">Why Claude Code skills achieve only 53% compliance — and the surprisingly simple fix.</p>
+        <h1 id="title" class="loading">Loading...</h1>
+        <p id="subtitle" class="subtitle loading">Loading content...</p>
 
         <div class="links">
             <a href="blog-post.html" class="link link-primary">
@@ -188,5 +195,46 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // Fetch and parse the markdown file
+        async function loadContent() {
+            try {
+                const response = await fetch('blog-post.md');
+                const markdown = await response.text();
+
+                // Extract title: first line starting with "# "
+                const titleMatch = markdown.match(/^#\s+(.+)$/m);
+                const title = titleMatch ? titleMatch[1] : 'Skills Research';
+
+                // Extract subtitle: first italicized line (wrapped in *)
+                const subtitleMatch = markdown.match(/^\*([^*]+)\*$/m);
+                const subtitle = subtitleMatch ? subtitleMatch[1] : '';
+
+                // Update the DOM
+                const titleEl = document.getElementById('title');
+                const subtitleEl = document.getElementById('subtitle');
+
+                titleEl.textContent = title;
+                titleEl.classList.remove('loading');
+
+                if (subtitle) {
+                    subtitleEl.textContent = subtitle;
+                }
+                subtitleEl.classList.remove('loading');
+
+            } catch (error) {
+                console.error('Failed to load blog-post.md:', error);
+                // Fallback content if fetch fails
+                document.getElementById('title').textContent = 'The Case of the Misplaced Instructions';
+                document.getElementById('title').classList.remove('loading');
+                document.getElementById('subtitle').textContent = 'Why Claude Code skills achieve only 53% compliance — and the surprisingly simple fix.';
+                document.getElementById('subtitle').classList.remove('loading');
+            }
+        }
+
+        // Load content when page loads
+        loadContent();
+    </script>
 </body>
 </html>
