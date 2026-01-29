@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skill Injection Analyzer | Claude Code Research</title>
-    <meta name="description" content="Extract and analyze how skills are transmitted in Claude Code's context window.">
+    <title>Context Window Inspector | Claude Code Research</title>
+    <meta name="description" content="Interactive visualization of Claude API context window structure and skill injection mechanism.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -30,8 +30,10 @@
             --purple: #aa66ff;
         }
 
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+        @keyframes glow { 0%, 100% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.3); } 50% { box-shadow: 0 0 0 8px rgba(0, 255, 136, 0); } }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html { font-size: 14px; }
@@ -40,7 +42,7 @@
             font-family: 'JetBrains Mono', monospace;
             background: var(--black);
             color: var(--text);
-            line-height: 1.6;
+            line-height: 1.5;
             min-height: 100vh;
         }
 
@@ -57,7 +59,7 @@
         .header-left {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 1.5rem;
         }
 
         .logo {
@@ -67,22 +69,24 @@
         }
 
         .logo-icon {
-            width: 32px;
-            height: 32px;
-            background: var(--accent-glow);
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--accent-glow), rgba(0, 255, 136, 0.05));
             border: 1px solid var(--accent-dim);
             border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: var(--accent);
-            font-size: 1rem;
+            font-size: 1.2rem;
+            font-weight: 700;
         }
 
         .logo-text {
             font-family: 'Space Grotesk', sans-serif;
-            font-size: 1rem;
+            font-size: 1.1rem;
             font-weight: 600;
+            letter-spacing: -0.01em;
             color: var(--text);
         }
 
@@ -90,82 +94,54 @@
             color: var(--accent);
         }
 
+        .logo-subtext {
+            font-size: 0.65rem;
+            color: var(--text-dim);
+            font-weight: 400;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
         .header-right {
             display: flex;
             align-items: center;
-            gap: 1rem;
-        }
-
-        .file-loader {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.75rem;
-            color: var(--text-dim);
+            gap: 1.5rem;
         }
 
         .source-badge {
             display: flex;
             align-items: center;
-            gap: 0.4rem;
-            padding: 0.3rem 0.6rem;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 4px;
+            gap: 0.5rem;
+            padding: 0.4rem 0.75rem;
+            background: var(--surface-elevated);
+            border: 1px solid var(--border-bright);
+            border-radius: 5px;
             font-size: 0.65rem;
             color: var(--text-muted);
+            letter-spacing: 0.03em;
         }
 
         .source-badge-label {
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            font-weight: 600;
         }
 
         .source-badge a {
             color: var(--purple);
             text-decoration: none;
             font-weight: 500;
+            transition: color 0.15s;
         }
 
         .source-badge a:hover {
-            text-decoration: underline;
-        }
-
-        .file-loader select {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            color: var(--text);
-            font-family: inherit;
-            font-size: 0.7rem;
-            padding: 0.35rem 0.5rem;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .file-loader input[type="file"] { display: none; }
-
-        .upload-btn {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            color: var(--text-dim);
-            font-family: inherit;
-            font-size: 0.7rem;
-            padding: 0.35rem 0.6rem;
-            border-radius: 4px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-        }
-
-        .upload-btn:hover {
-            border-color: var(--accent-dim);
             color: var(--accent);
         }
 
         .header-links {
             display: flex;
-            gap: 0.75rem;
+            gap: 1rem;
+            border-left: 1px solid var(--border);
+            padding-left: 1rem;
         }
 
         .header-link {
@@ -176,6 +152,9 @@
             align-items: center;
             gap: 0.3rem;
             transition: color 0.15s;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 500;
         }
 
         .header-link:hover { color: var(--accent); }
@@ -183,199 +162,363 @@
 
         /* Main Layout */
         .main {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            height: calc(100vh - 58px);
-        }
-
-        /* Left Panel - Findings */
-        .findings-panel {
-            border-right: 1px solid var(--border);
-            overflow-y: auto;
-            padding: 1.5rem;
-        }
-
-        .section {
-            margin-bottom: 2rem;
-            animation: slideIn 0.3s ease-out;
-        }
-
-        .section-header {
             display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
+            height: calc(100vh - 66px);
         }
 
-        .section-title {
+        /* Context Window Inspector */
+        .inspector-panel {
+            flex: 0 0 50%;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .inspector-title {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            background: var(--darker);
+        }
+
+        .inspector-title h2 {
             font-family: 'Space Grotesk', sans-serif;
-            font-size: 0.9rem;
+            font-size: 1rem;
             font-weight: 600;
             color: var(--text);
+            letter-spacing: -0.01em;
+            margin-bottom: 0.25rem;
         }
 
-        .section-badge {
-            font-size: 0.55rem;
-            font-weight: 600;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            padding: 0.2rem 0.4rem;
-            border-radius: 3px;
-        }
-
-        .badge-finding {
-            background: var(--danger-glow);
-            color: var(--danger);
-            border: 1px solid var(--danger-dim);
-        }
-
-        .badge-info {
-            background: rgba(0, 170, 255, 0.1);
-            color: var(--info);
-            border: 1px solid var(--info);
-        }
-
-        /* Finding Cards */
-        .finding-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 0.75rem;
-        }
-
-        .finding-card.critical {
-            border-color: var(--danger-dim);
-            background: linear-gradient(135deg, var(--danger-glow), var(--surface));
-        }
-
-        .finding-label {
-            font-size: 0.6rem;
-            font-weight: 600;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            color: var(--text-muted);
-            margin-bottom: 0.5rem;
-        }
-
-        .finding-card.critical .finding-label {
-            color: var(--danger);
-        }
-
-        .finding-value {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text);
-        }
-
-        .finding-card.critical .finding-value {
-            color: var(--danger);
-        }
-
-        .finding-desc {
-            font-size: 0.75rem;
-            color: var(--text-dim);
-            margin-top: 0.5rem;
-        }
-
-        /* Compact Stats Row */
-        .stats-row {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .stat-mini {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 0.75rem;
-            text-align: center;
-        }
-
-        .stat-mini-value {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--text);
-        }
-
-        .stat-mini-label {
-            font-size: 0.55rem;
+        .inspector-title p {
+            font-size: 0.65rem;
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }
 
-        /* Authority Visualization */
-        .authority-stack {
+        .context-visualization {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        /* Context Window Structure */
+        .api-request-box {
+            border: 2px solid var(--border-bright);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.02);
+            overflow: hidden;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .api-label {
+            padding: 0.5rem 0.75rem;
+            background: var(--surface-elevated);
+            border-bottom: 1px solid var(--border-bright);
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .api-label-main {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .api-label span {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            font-size: 0.5rem;
+            font-weight: 700;
+            color: var(--text-dim);
+        }
+
+        .api-label .expand-icon {
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: transform 0.2s;
+            user-select: none;
+        }
+
+        .api-label .expand-icon.open {
+            transform: rotate(90deg);
+        }
+
+        .api-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.2s ease-out;
+        }
+
+        .api-content.open {
+            max-height: 300px;
+        }
+
+        .section-stack {
+            display: flex;
+            flex-direction: column;
+            padding: 0.75rem;
+        }
+
+        /* Individual Sections in API Request */
+        .api-section {
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .api-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--text-muted);
+        }
+
+        .api-section.system::before { background: var(--accent); }
+        .api-section.tools::before { background: var(--info); }
+        .api-section.messages::before { background: var(--warning); }
+        .api-section.messages-injection::before { background: var(--danger); animation: pulse 2s infinite; }
+
+        .api-section:hover {
+            background: var(--surface-elevated);
+            border-color: var(--border-bright);
+        }
+
+        .api-section.messages-injection {
+            background: rgba(255, 51, 102, 0.08);
+            border-color: var(--danger-dim);
+        }
+
+        .api-section.messages-injection:hover {
+            background: rgba(255, 51, 102, 0.12);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-name {
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: var(--text);
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .section-size {
+            font-size: 0.6rem;
+            color: var(--text-dim);
+            background: var(--darker);
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+        }
+
+        .section-meta {
+            font-size: 0.65rem;
+            color: var(--text-dim);
+            margin-bottom: 0.4rem;
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .section-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .meta-icon {
+            width: 12px;
+            height: 12px;
+            background: currentColor;
+            opacity: 0.3;
+            border-radius: 2px;
+        }
+
+        /* Size Bar */
+        .size-bar {
+            width: 100%;
+            height: 3px;
+            background: var(--border);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 0.4rem;
+        }
+
+        .size-fill {
+            height: 100%;
+            background: var(--text-dim);
+            transition: width 0.2s;
+        }
+
+        .api-section.system .size-fill { background: var(--accent); }
+        .api-section.tools .size-fill { background: var(--info); }
+        .api-section.messages .size-fill { background: var(--warning); }
+        .api-section.messages-injection .size-fill { background: var(--danger); }
+
+        /* Authority Comparison */
+        .authority-compare {
+            background: var(--surface-elevated);
+            border: 1px solid var(--border-bright);
+            border-radius: 6px;
+            padding: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .authority-compare-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .authority-bars {
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
         }
 
-        .authority-item {
+        .authority-bar {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            padding: 0.5rem 0.75rem;
-            background: var(--darker);
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            font-size: 0.75rem;
+            gap: 0.5rem;
         }
-
-        .authority-item.highlight {
-            background: var(--danger-glow);
-            border-color: var(--danger-dim);
-        }
-
-        .authority-bar {
-            flex: 1;
-            height: 4px;
-            background: var(--border);
-            border-radius: 2px;
-            overflow: hidden;
-        }
-
-        .authority-fill {
-            height: 100%;
-            border-radius: 2px;
-        }
-
-        .authority-fill.high { background: var(--accent); width: 100%; }
-        .authority-fill.medium { background: var(--info); width: 65%; }
-        .authority-fill.low { background: var(--danger); width: 30%; }
-        .authority-fill.lowest { background: var(--warning); width: 15%; }
 
         .authority-label {
-            width: 80px;
-            flex-shrink: 0;
+            flex: 0 0 100px;
             font-size: 0.65rem;
             color: var(--text-dim);
+            font-weight: 500;
         }
 
-        .authority-item.highlight .authority-label {
+        .authority-bar.skills .authority-label {
             color: var(--danger);
             font-weight: 600;
         }
 
-        /* Right Panel - Data Viewer */
-        .data-panel {
+        .authority-meter {
+            flex: 1;
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .authority-meter-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.2s;
+        }
+
+        .authority-bar.system .authority-meter-fill { background: var(--accent); width: 100%; }
+        .authority-bar.tools .authority-meter-fill { background: var(--info); width: 70%; }
+        .authority-bar.skills .authority-meter-fill { background: var(--danger); width: 35%; animation: pulse 2s infinite; }
+        .authority-bar.results .authority-meter-fill { background: var(--warning); width: 20%; }
+
+        .authority-percent {
+            flex: 0 0 35px;
+            text-align: right;
+            font-size: 0.65rem;
+            color: var(--text-dim);
+            font-weight: 500;
+        }
+
+        .authority-bar.skills .authority-percent {
+            color: var(--danger);
+        }
+
+        /* Key Finding */
+        .key-finding {
+            background: rgba(255, 51, 102, 0.08);
+            border: 2px solid var(--danger-dim);
+            border-radius: 6px;
+            padding: 1rem;
+            margin-top: 1rem;
+            animation: slideDown 0.4s ease-out 0.1s both;
+        }
+
+        .finding-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .finding-icon {
+            font-size: 1.2rem;
+            line-height: 1;
+        }
+
+        .finding-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--danger);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .finding-content {
+            font-size: 0.75rem;
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .finding-code {
+            background: var(--black);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 0.4rem 0.6rem;
+            margin: 0.5rem 0;
+            font-size: 0.65rem;
+            color: var(--accent);
+            display: inline-block;
+        }
+
+        /* Detail Panel */
+        .detail-panel {
+            flex: 1;
             display: flex;
             flex-direction: column;
             background: var(--darker);
         }
 
-        .data-tabs {
+        .detail-tabs {
             display: flex;
             border-bottom: 1px solid var(--border);
             background: var(--dark);
         }
 
-        .data-tab {
+        .detail-tab {
             padding: 0.75rem 1rem;
             font-size: 0.7rem;
             font-weight: 500;
@@ -383,53 +526,58 @@
             cursor: pointer;
             border-bottom: 2px solid transparent;
             transition: all 0.15s;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
         }
 
-        .data-tab:hover {
+        .detail-tab:hover {
             color: var(--text);
-            background: var(--surface);
         }
 
-        .data-tab.active {
+        .detail-tab.active {
             color: var(--accent);
             border-bottom-color: var(--accent);
         }
 
-        .data-content {
+        .detail-content {
             flex: 1;
             overflow: auto;
-            padding: 1rem;
+            padding: 1.5rem;
         }
 
-        .data-view {
+        .detail-view {
             display: none;
         }
 
-        .data-view.active {
+        .detail-view.active {
             display: block;
+            animation: fadeIn 0.2s ease-out;
         }
 
-        /* Code Display */
+        /* Code Block */
         .code-block {
             background: var(--black);
-            border: 1px solid var(--border);
+            border: 1px solid var(--border-bright);
             border-radius: 6px;
             overflow: hidden;
+            margin-bottom: 1rem;
         }
 
         .code-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0.5rem 0.75rem;
+            padding: 0.6rem 0.75rem;
             background: var(--surface);
             border-bottom: 1px solid var(--border);
             font-size: 0.65rem;
             color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
         }
 
         .code-body {
-            padding: 0.75rem;
+            padding: 1rem;
             font-size: 0.7rem;
             line-height: 1.6;
             overflow-x: auto;
@@ -440,144 +588,109 @@
         .syn-key { color: #88ddff; }
         .syn-str { color: var(--accent); }
         .syn-num { color: var(--warning); }
-        .syn-comment { color: var(--text-muted); font-style: italic; }
+        .syn-comment { color: var(--text-dim); opacity: 0.7; }
 
-        /* Injection Preview */
-        .injection-preview {
-            background: var(--danger-glow);
-            border: 1px dashed var(--danger-dim);
+        /* Injection Spotlight */
+        .injection-spotlight {
+            background: linear-gradient(135deg, rgba(255, 51, 102, 0.1), rgba(255, 51, 102, 0.05));
+            border: 2px solid var(--danger-dim);
             border-radius: 6px;
             padding: 1rem;
-            margin-top: 1rem;
+            margin-bottom: 1rem;
         }
 
-        .injection-preview-header {
+        .injection-spotlight-header {
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            font-size: 0.65rem;
-            font-weight: 600;
-            color: var(--danger);
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
             margin-bottom: 0.75rem;
         }
 
-        .injection-preview-header::before {
-            content: '⚠';
+        .injection-spotlight-icon {
+            font-size: 1.1rem;
+            line-height: 1;
         }
 
-        /* Flow Diagram */
-        .flow-diagram {
-            font-size: 0.7rem;
-            line-height: 1.8;
-        }
-
-        .flow-step {
-            display: flex;
-            align-items: flex-start;
-            gap: 0.75rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .flow-num {
-            width: 20px;
-            height: 20px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.6rem;
-            font-weight: 600;
-            flex-shrink: 0;
-        }
-
-        .flow-step.critical .flow-num {
-            background: var(--danger);
-            border-color: var(--danger);
-            color: white;
-        }
-
-        .flow-text {
-            color: var(--text-dim);
-        }
-
-        .flow-step.critical .flow-text {
+        .injection-spotlight-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 700;
             color: var(--danger);
-            font-weight: 500;
-        }
-
-        /* Comparison Table */
-        .compare-table {
-            width: 100%;
-            font-size: 0.7rem;
-            border-collapse: collapse;
-        }
-
-        .compare-table th {
-            text-align: left;
-            padding: 0.5rem;
-            font-size: 0.6rem;
-            font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            color: var(--text-muted);
-            border-bottom: 1px solid var(--border);
         }
 
-        .compare-table td {
-            padding: 0.5rem;
-            border-bottom: 1px solid var(--border);
-            color: var(--text-dim);
-        }
-
-        .compare-table tr.highlight td {
-            background: var(--accent-glow);
-            color: var(--accent);
-            font-weight: 500;
-        }
-
-        .compare-table tr.danger td {
-            background: var(--danger-glow);
-            color: var(--danger);
-        }
-
-        /* Footer link */
-        .panel-footer {
-            padding: 0.75rem 1rem;
-            border-top: 1px solid var(--border);
-            background: var(--dark);
+        .injection-spotlight-text {
             font-size: 0.7rem;
             color: var(--text-dim);
+            line-height: 1.6;
         }
 
-        .panel-footer a {
-            color: var(--accent);
-            text-decoration: none;
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
         }
 
-        .panel-footer a:hover {
-            text-decoration: underline;
+        ::-webkit-scrollbar-track {
+            background: var(--darker);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-bright);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-dim);
         }
 
         /* Responsive */
-        @media (max-width: 900px) {
+        @media (max-width: 1000px) {
             .main {
-                grid-template-columns: 1fr;
-                grid-template-rows: 1fr 1fr;
+                flex-direction: column;
             }
-            .findings-panel {
+
+            .inspector-panel {
+                flex: 0 0 50%;
                 border-right: none;
                 border-bottom: 1px solid var(--border);
+            }
+
+            .detail-panel {
+                flex: 1;
             }
         }
 
         @media (max-width: 600px) {
-            .header { flex-direction: column; gap: 0.75rem; }
-            .header-right { width: 100%; justify-content: space-between; }
-            .stats-row { grid-template-columns: 1fr; }
+            .header {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .header-left {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .header-right {
+                width: 100%;
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .header-links {
+                border-left: none;
+                padding-left: 0;
+                width: 100%;
+            }
+
+            .context-visualization {
+                padding: 1rem;
+            }
+
+            .detail-content {
+                padding: 1rem;
+            }
         }
     </style>
 </head>
@@ -586,25 +699,17 @@
     <header class="header">
         <div class="header-left">
             <div class="logo">
-                <div class="logo-icon">⚡</div>
-                <div class="logo-text">Skill <span>Injection</span> Analyzer</div>
+                <div class="logo-icon">◇</div>
+                <div>
+                    <div class="logo-text">Context <span>Inspector</span></div>
+                    <div class="logo-subtext">API Request Debugger</div>
+                </div>
             </div>
         </div>
         <div class="header-right">
             <div class="source-badge">
                 <span class="source-badge-label">Source:</span>
-                <a href="https://github.com/anthropics/claude-code-router" target="_blank" title="Claude Code Router - API traffic interceptor">Claude Code Router</a>
-            </div>
-            <div class="file-loader">
-                <select id="data-source">
-                    <option value="embedded">Demo Data</option>
-                    <option value="sample_data.json">sample_data.json</option>
-                </select>
-                <label class="upload-btn" for="file-input">
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                    Upload
-                </label>
-                <input type="file" id="file-input" accept=".log,.json,.jsonl">
+                <a href="https://github.com/anthropics/claude-code-router" target="_blank">Claude Code Router</a>
             </div>
             <div class="header-links">
                 <a href="blog-post.html" class="header-link">
@@ -621,199 +726,149 @@
 
     <!-- Main Content -->
     <div class="main">
-        <!-- Left: Findings -->
-        <div class="findings-panel">
-            <div class="section">
-                <div class="section-header">
-                    <span class="section-title">Key Finding</span>
-                    <span class="section-badge badge-finding">Critical</span>
-                </div>
-
-                <div class="finding-card critical">
-                    <div class="finding-label">Skill Instructions Location</div>
-                    <div class="finding-value">User Message</div>
-                    <div class="finding-desc">Skills are injected as <code style="background: var(--black); padding: 0.1rem 0.3rem; border-radius: 3px;">role: "user"</code> — not in the system prompt where they would have authority.</div>
-                </div>
-
-                <div class="stats-row">
-                    <div class="stat-mini">
-                        <div class="stat-mini-value" id="stat-system">~150KB</div>
-                        <div class="stat-mini-label">System Prompt</div>
-                    </div>
-                    <div class="stat-mini">
-                        <div class="stat-mini-value" id="stat-metadata">~12KB</div>
-                        <div class="stat-mini-label">Skill Metadata</div>
-                    </div>
-                    <div class="stat-mini">
-                        <div class="stat-mini-value" id="stat-injection">~18KB</div>
-                        <div class="stat-mini-label">Injected Content</div>
-                    </div>
-                </div>
+        <!-- Left: Context Window Inspector -->
+        <div class="inspector-panel">
+            <div class="inspector-title">
+                <h2>API Request Structure</h2>
+                <p>Click sections to inspect their contents</p>
             </div>
 
-            <div class="section">
-                <div class="section-header">
-                    <span class="section-title">Prompt Authority Hierarchy</span>
+            <div class="context-visualization">
+                <div class="api-request-box">
+                    <div class="api-label">
+                        <div class="api-label-main">
+                            <span>POST</span>
+                            /v1/messages
+                        </div>
+                        <span class="expand-icon" data-expand="api-request">▶</span>
+                    </div>
+                    <div id="api-request" class="api-content section-stack">
+                        <!-- System Prompt -->
+                        <div class="api-section system" data-section="system">
+                            <div class="section-header">
+                                <span class="section-name">system</span>
+                                <span class="section-size">~150 KB</span>
+                            </div>
+                            <div class="section-meta">
+                                <span><span class="meta-icon"></span> Cached</span>
+                                <span><span class="meta-icon"></span> Authority: High</span>
+                            </div>
+                            <div class="size-bar"><div class="size-fill" style="width: 70%;"></div></div>
+                        </div>
+
+                        <!-- Tools Array -->
+                        <div class="api-section tools" data-section="tools">
+                            <div class="section-header">
+                                <span class="section-name">tools</span>
+                                <span class="section-size">~80 tools</span>
+                            </div>
+                            <div class="section-meta">
+                                <span><span class="meta-icon"></span> Not cached</span>
+                                <span><span class="meta-icon"></span> Authority: Medium</span>
+                            </div>
+                            <div class="size-bar"><div class="size-fill" style="width: 45%;"></div></div>
+                        </div>
+
+                        <!-- Messages Array -->
+                        <div class="api-section messages" data-section="messages">
+                            <div class="section-header">
+                                <span class="section-name">messages</span>
+                                <span class="section-size">User + Assistant</span>
+                            </div>
+                            <div class="section-meta">
+                                <span><span class="meta-icon"></span> Dynamic</span>
+                                <span><span class="meta-icon"></span> Authority: Low</span>
+                            </div>
+                            <div class="size-bar"><div class="size-fill" style="width: 35%;"></div></div>
+                        </div>
+
+                        <!-- Skill Injection Point -->
+                        <div class="api-section messages-injection" data-section="injection">
+                            <div class="section-header">
+                                <span class="section-name">↳ Skill Content (Injected)</span>
+                                <span class="section-size">~18 KB</span>
+                            </div>
+                            <div class="section-meta">
+                                <span style="color: var(--danger); font-weight: 600;"><span class="meta-icon"></span> role: "user"</span>
+                                <span style="color: var(--danger);"><span class="meta-icon"></span> Authority: Low</span>
+                            </div>
+                            <div class="size-bar"><div class="size-fill" style="width: 15%;"></div></div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="authority-stack">
-                    <div class="authority-item">
-                        <span class="authority-label">System</span>
-                        <div class="authority-bar"><div class="authority-fill high"></div></div>
-                        <span style="font-size: 0.6rem; color: var(--accent);">Highest</span>
-                    </div>
-                    <div class="authority-item">
-                        <span class="authority-label">Tool Desc</span>
-                        <div class="authority-bar"><div class="authority-fill medium"></div></div>
-                        <span style="font-size: 0.6rem; color: var(--info);">High</span>
-                    </div>
-                    <div class="authority-item highlight">
-                        <span class="authority-label">User Msg ← Skills</span>
-                        <div class="authority-bar"><div class="authority-fill low"></div></div>
-                        <span style="font-size: 0.6rem; color: var(--danger);">Low</span>
-                    </div>
-                    <div class="authority-item">
-                        <span class="authority-label">Tool Result</span>
-                        <div class="authority-bar"><div class="authority-fill lowest"></div></div>
-                        <span style="font-size: 0.6rem; color: var(--warning);">Lowest</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="section">
-                <div class="section-header">
-                    <span class="section-title">Injection Flow</span>
-                </div>
-
-                <div class="flow-diagram">
-                    <div class="flow-step">
-                        <div class="flow-num">1</div>
-                        <div class="flow-text">User requests PDF task</div>
-                    </div>
-                    <div class="flow-step">
-                        <div class="flow-num">2</div>
-                        <div class="flow-text">Model sees Skill tool in tools array</div>
-                    </div>
-                    <div class="flow-step">
-                        <div class="flow-num">3</div>
-                        <div class="flow-text">Model invokes <code style="background: var(--surface); padding: 0.1rem 0.3rem; border-radius: 2px;">Skill(skill: "pdf")</code></div>
-                    </div>
-                    <div class="flow-step critical">
-                        <div class="flow-num">4</div>
-                        <div class="flow-text">Skill content injected as user message</div>
-                    </div>
-                    <div class="flow-step">
-                        <div class="flow-num">5</div>
-                        <div class="flow-text">Model processes with low authority → 53% compliance</div>
+                <!-- Authority Hierarchy -->
+                <div class="authority-compare">
+                    <div class="authority-compare-title">Prompt Authority Hierarchy</div>
+                    <div class="authority-bars">
+                        <div class="authority-bar system">
+                            <span class="authority-label">System Prompt</span>
+                            <div class="authority-meter"><div class="authority-meter-fill"></div></div>
+                            <span class="authority-percent">100%</span>
+                        </div>
+                        <div class="authority-bar tools">
+                            <span class="authority-label">Tool Descriptions</span>
+                            <div class="authority-meter"><div class="authority-meter-fill"></div></div>
+                            <span class="authority-percent">70%</span>
+                        </div>
+                        <div class="authority-bar skills">
+                            <span class="authority-label">Skills (User Msg)</span>
+                            <div class="authority-meter"><div class="authority-meter-fill"></div></div>
+                            <span class="authority-percent">35%</span>
+                        </div>
+                        <div class="authority-bar results">
+                            <span class="authority-label">Tool Results</span>
+                            <div class="authority-meter"><div class="authority-meter-fill"></div></div>
+                            <span class="authority-percent">20%</span>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="section">
-                <div class="section-header">
-                    <span class="section-title">Vercel Benchmark</span>
-                    <span class="section-badge badge-info">External</span>
+                <!-- Key Finding -->
+                <div class="key-finding">
+                    <div class="finding-header">
+                        <span class="finding-icon">⚠</span>
+                        <span class="finding-title">Critical Issue</span>
+                    </div>
+                    <div class="finding-content">
+                        Skills are injected at <span class="finding-code">role: "user"</span> level instead of <code class="finding-code">system</code> level.
+                        <br><br>
+                        This results in <strong>53% performance</strong> — same as no instructions. To achieve 100%, skills must be moved to the system prompt.
+                    </div>
                 </div>
-
-                <table class="compare-table">
-                    <thead>
-                        <tr>
-                            <th>Approach</th>
-                            <th>Location</th>
-                            <th>Pass Rate</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr class="highlight">
-                            <td>AGENTS.md</td>
-                            <td>System Prompt</td>
-                            <td>100%</td>
-                        </tr>
-                        <tr class="danger">
-                            <td>Skills (Default)</td>
-                            <td>User Message</td>
-                            <td>53%</td>
-                        </tr>
-                        <tr>
-                            <td>No Instructions</td>
-                            <td>—</td>
-                            <td>53%</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="panel-footer">
-                <a href="blog-post.html">Read the full research →</a>
             </div>
         </div>
 
-        <!-- Right: Data Viewer -->
-        <div class="data-panel">
-            <div class="data-tabs">
-                <div class="data-tab active" data-view="extracted">Extracted Data</div>
-                <div class="data-tab" data-view="injection">Injection Sample</div>
-                <div class="data-tab" data-view="structure">API Structure</div>
+        <!-- Right: Detail Inspector -->
+        <div class="detail-panel">
+            <div class="detail-tabs">
+                <div class="detail-tab active" data-tab="injection-detail">Injection Point</div>
+                <div class="detail-tab" data-tab="system-detail">System Prompt</div>
+                <div class="detail-tab" data-tab="tools-detail">Tools Array</div>
+                <div class="detail-tab" data-tab="flow">Request Flow</div>
             </div>
 
-            <div class="data-content">
-                <!-- Extracted Data View -->
-                <div id="extracted" class="data-view active">
+            <div class="detail-content">
+                <!-- Injection Detail -->
+                <div id="injection-detail" class="detail-view active">
+                    <div class="injection-spotlight">
+                        <div class="injection-spotlight-header">
+                            <span class="injection-spotlight-icon">⚡</span>
+                            <span class="injection-spotlight-title">Where Skills Get Injected</span>
+                        </div>
+                        <div class="injection-spotlight-text">
+                            When Claude invokes a skill tool, the full skill content is inserted into the messages array as a <strong>user message</strong>. This is low-authority and competes with user context.
+                        </div>
+                    </div>
+
                     <div class="code-block">
-                        <div class="code-header">
-                            <span>research_findings.json</span>
-                            <span id="data-source-label">embedded_demo</span>
-                        </div>
-                        <div style="padding: 0.5rem 0.75rem; background: rgba(170, 102, 255, 0.08); border-bottom: 1px solid var(--border); font-size: 0.6rem; color: var(--text-muted);">
-                            Data extracted from <a href="https://github.com/anthropics/claude-code-router" target="_blank" style="color: var(--purple);">Claude Code Router</a> logs — captures API traffic between Claude Code and Anthropic API
-                        </div>
-                        <div class="code-body" id="extracted-data">{
-  <span class="syn-key">"research_date"</span>: <span class="syn-str">"2026-01-28"</span>,
-  <span class="syn-key">"tool_used"</span>: <span class="syn-str">"Claude Code Router"</span>,
-
-  <span class="syn-key">"findings"</span>: {
-    <span class="syn-key">"system_prompt"</span>: {
-      <span class="syn-key">"contains_skill_instructions"</span>: <span class="syn-num">false</span>,
-      <span class="syn-key">"size_kb"</span>: <span class="syn-num">150</span>,
-      <span class="syn-key">"cached"</span>: <span class="syn-num">true</span>
-    },
-
-    <span class="syn-key">"skill_metadata"</span>: {
-      <span class="syn-key">"location"</span>: <span class="syn-str">"tools[].Skill.description"</span>,
-      <span class="syn-key">"size_kb"</span>: <span class="syn-num">12</span>,
-      <span class="syn-key">"contains"</span>: <span class="syn-str">"skill names, triggers, brief descriptions"</span>
-    },
-
-    <span class="syn-key">"skill_content_injection"</span>: {
-      <span class="syn-key">"role"</span>: <span class="syn-str">"user"</span>,  <span class="syn-comment">// ← THE PROBLEM</span>
-      <span class="syn-key">"size_kb"</span>: <span class="syn-num">18</span>,
-      <span class="syn-key">"wrapper"</span>: <span class="syn-str">"&lt;system-reminder&gt;"</span>,
-      <span class="syn-key">"authority_level"</span>: <span class="syn-str">"low"</span>
-    }
-  },
-
-  <span class="syn-key">"conclusion"</span>: <span class="syn-str">"Skills perform at 53% (same as no instructions) because they're injected as user messages instead of system prompt content."</span>
-}</div>
-                    </div>
-                </div>
-
-                <!-- Injection Sample View -->
-                <div id="injection" class="data-view">
-                    <div class="injection-preview">
-                        <div class="injection-preview-header">Skill Content Injected as User Message</div>
-                    </div>
-
-                    <div class="code-block" style="margin-top: 1rem;">
-                        <div class="code-header">
-                            <span>messages[n] — After Skill tool invocation</span>
-                            <span style="color: var(--danger);">role: "user"</span>
-                        </div>
+                        <div class="code-header">messages array — After Skill tool invocation</div>
                         <div class="code-body">{
   <span class="syn-key">"role"</span>: <span class="syn-str">"user"</span>,
   <span class="syn-key">"content"</span>: [{
     <span class="syn-key">"type"</span>: <span class="syn-str">"text"</span>,
     <span class="syn-key">"text"</span>: <span class="syn-str">"&lt;system-reminder&gt;
-The \"pdf\" skill is now active.
+The 'pdf' skill is now active.
 Base directory: /sessions/.../skills/pdf
 &lt;/system-reminder&gt;
 
@@ -824,30 +879,38 @@ Comprehensive PDF document manipulation:
 - Reading and extracting text
 - Creating new PDF documents
 - Merging multiple PDFs
-- Filling PDF forms
 ...
 
 ## Instructions
 ### Library Selection
 - Use pypdf2 for basic operations
 - Use pdfrw for form filling
-- Use reportlab for creating new PDFs
+- Use reportlab for creating PDFs
 
-### Error Handling
-Always wrap PDF operations in try/catch...
-
-<span class="syn-comment">[~18KB of detailed instructions]</span>"</span>
+[~18KB of detailed instructions]"</span>
   }]
 }</div>
                     </div>
+
+                    <div class="code-block">
+                        <div class="code-header">The Problem</div>
+                        <div class="code-body"><span class="syn-comment">// As a USER message, this competes with:</span>
+<span class="syn-comment">// - User's actual task description</span>
+<span class="syn-comment">// - Context about what user wants</span>
+<span class="syn-comment">// - Other important instructions</span>
+
+<span class="syn-comment">// If the model has 200k context and skill is 18k,</span>
+<span class="syn-comment">// the skill dilutes other context by ~9%</span>
+
+<span class="syn-comment">// But worse: system-level instructions have</span>
+<span class="syn-comment">// 3-5x more influence than user-level content</span></div>
+                    </div>
                 </div>
 
-                <!-- API Structure View -->
-                <div id="structure" class="data-view">
+                <!-- System Prompt Detail -->
+                <div id="system-detail" class="detail-view">
                     <div class="code-block">
-                        <div class="code-header">
-                            <span>Claude Code API Request Structure</span>
-                        </div>
+                        <div class="code-header">system array — Claude Code System Prompt</div>
                         <div class="code-body">{
   <span class="syn-key">"system"</span>: [
     {
@@ -857,33 +920,120 @@ Always wrap PDF operations in try/catch...
     },
     {
       <span class="syn-key">"type"</span>: <span class="syn-str">"text"</span>,
-      <span class="syn-key">"text"</span>: <span class="syn-str">"You are Claude Code... [~140KB]"</span>,
+      <span class="syn-key">"text"</span>: <span class="syn-str">"You are Claude Code, a specialized agent for
+the Claude Code IDE. You have access to
+tools for file manipulation, execution...
+
+[~140KB of foundational instructions]"</span>,
       <span class="syn-key">"cache_control"</span>: { <span class="syn-key">"type"</span>: <span class="syn-str">"ephemeral"</span> }
     }
-    <span class="syn-comment">// NO SKILL CONTENT HERE</span>
-  ],
+    <span class="syn-comment">// NOTE: Skills are NOT here!</span>
+  ]
+}</div>
+                    </div>
 
+                    <div style="margin-top: 1rem; padding: 1rem; background: rgba(0, 170, 255, 0.08); border: 1px solid rgba(0, 170, 255, 0.2); border-radius: 5px;">
+                        <div style="font-size: 0.75rem; color: var(--info); margin-bottom: 0.5rem; font-weight: 600;">SYSTEM PROMPT AUTHORITY</div>
+                        <div style="font-size: 0.7rem; color: var(--text-dim); line-height: 1.6;">
+                            The system prompt is the most authoritative source of instructions. Every token here shapes the model's behavior for the entire conversation. Moving skill content here would result in <strong>100% compliance</strong> instead of current 53%.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tools Array Detail -->
+                <div id="tools-detail" class="detail-view">
+                    <div class="code-block">
+                        <div class="code-header">tools array — Available Tools & Skills</div>
+                        <div class="code-body">{
   <span class="syn-key">"tools"</span>: [
     { <span class="syn-key">"name"</span>: <span class="syn-str">"Read"</span>, ... },
     { <span class="syn-key">"name"</span>: <span class="syn-str">"Write"</span>, ... },
     { <span class="syn-key">"name"</span>: <span class="syn-str">"Bash"</span>, ... },
     {
       <span class="syn-key">"name"</span>: <span class="syn-str">"Skill"</span>,
-      <span class="syn-key">"description"</span>: <span class="syn-str">"Available skills:\n- pdf\n- xlsx\n- docx\n..."</span>
+      <span class="syn-key">"description"</span>: <span class="syn-str">"Execute specialized skills
+
+Available skills:
+- pdf: PDF processing
+- xlsx: Excel/spreadsheet tools
+- docx: Word documents
+- pptx: PowerPoint presentations
+..."</span>
       <span class="syn-comment">// Only metadata, not full instructions</span>
     },
     <span class="syn-comment">// ~80 tools total</span>
-  ],
-
-  <span class="syn-key">"messages"</span>: [
-    { <span class="syn-key">"role"</span>: <span class="syn-str">"user"</span>, <span class="syn-key">"content"</span>: <span class="syn-str">"Create a PDF..."</span> },
-    { <span class="syn-key">"role"</span>: <span class="syn-str">"assistant"</span>, <span class="syn-key">"content"</span>: [<span class="syn-str">"tool_use: Skill"</span>] },
-    {
-      <span class="syn-key">"role"</span>: <span class="syn-str">"user"</span>,  <span class="syn-comment">// ← SKILL INJECTED HERE</span>
-      <span class="syn-key">"content"</span>: <span class="syn-str">"&lt;system-reminder&gt;...18KB..."</span>
-    }
   ]
 }</div>
+                    </div>
+
+                    <div style="margin-top: 1rem; padding: 1rem; background: rgba(0, 170, 255, 0.08); border: 1px solid rgba(0, 170, 255, 0.2); border-radius: 5px;">
+                        <div style="font-size: 0.75rem; color: var(--info); margin-bottom: 0.5rem; font-weight: 600;">TOOL ARRAY AUTHORITY</div>
+                        <div style="font-size: 0.7rem; color: var(--text-dim); line-height: 1.6;">
+                            The Skill tool has only a brief description in the tools array. The full skill instructions are NOT here — they're injected later as user messages when the tool is invoked. This delays critical context until after the tool decision is made.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Request Flow -->
+                <div id="flow" class="detail-view">
+                    <div style="padding: 0; margin: 0;">
+                        <div style="margin-bottom: 1.5rem;">
+                            <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); font-weight: 600; margin-bottom: 1rem;">Request Flow Diagram</div>
+
+                            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                                <!-- Step 1 -->
+                                <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
+                                    <div style="width: 28px; height: 28px; background: var(--surface-elevated); border: 1px solid var(--border-bright); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: 600; color: var(--text);">1</div>
+                                    <div>
+                                        <div style="font-size: 0.75rem; font-weight: 600; color: var(--text); margin-bottom: 0.25rem;">User requests task</div>
+                                        <div style="font-size: 0.7rem; color: var(--text-dim);">e.g., "Create a PDF from this data"</div>
+                                    </div>
+                                </div>
+
+                                <!-- Step 2 -->
+                                <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
+                                    <div style="width: 28px; height: 28px; background: var(--surface-elevated); border: 1px solid var(--border-bright); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: 600; color: var(--text);">2</div>
+                                    <div>
+                                        <div style="font-size: 0.75rem; font-weight: 600; color: var(--text); margin-bottom: 0.25rem;">Model sees Skill tool in tools array</div>
+                                        <div style="font-size: 0.7rem; color: var(--text-dim);">Only sees brief description: "Execute specialized skills"</div>
+                                    </div>
+                                </div>
+
+                                <!-- Step 3 -->
+                                <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
+                                    <div style="width: 28px; height: 28px; background: var(--surface-elevated); border: 1px solid var(--border-bright); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: 600; color: var(--text);">3</div>
+                                    <div>
+                                        <div style="font-size: 0.75rem; font-weight: 600; color: var(--text); margin-bottom: 0.25rem;">Model invokes skill</div>
+                                        <div style="font-size: 0.7rem; color: var(--text-dim);">Calls: {"name": "Skill", "input": {"skill": "pdf"}}</div>
+                                    </div>
+                                </div>
+
+                                <!-- Step 4 - PROBLEM -->
+                                <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
+                                    <div style="width: 28px; height: 28px; background: var(--danger); border: 1px solid var(--danger-dim); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: 600; color: white; animation: pulse 2s infinite;">4</div>
+                                    <div>
+                                        <div style="font-size: 0.75rem; font-weight: 700; color: var(--danger); margin-bottom: 0.25rem; text-transform: uppercase;">⚠ Skill content injected as USER message</div>
+                                        <div style="font-size: 0.7rem; color: var(--text-dim); background: rgba(255, 51, 102, 0.08); padding: 0.5rem; border-radius: 4px; border-left: 2px solid var(--danger);">Full 18KB of skill instructions inserted into messages array as "role: user"</div>
+                                    </div>
+                                </div>
+
+                                <!-- Step 5 -->
+                                <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
+                                    <div style="width: 28px; height: 28px; background: var(--surface-elevated); border: 1px solid var(--border-bright); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: 600; color: var(--text);">5</div>
+                                    <div>
+                                        <div style="font-size: 0.75rem; font-weight: 600; color: var(--text); margin-bottom: 0.25rem;">Model processes with low authority</div>
+                                        <div style="font-size: 0.7rem; color: var(--danger); font-weight: 500;">Result: 53% compliance (same as no instructions)</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 1.5rem; padding: 1rem; background: var(--accent-glow); border: 1px solid var(--accent-dim); border-radius: 5px;">
+                            <div style="font-size: 0.75rem; color: var(--accent); margin-bottom: 0.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em;">Solution</div>
+                            <div style="font-size: 0.7rem; color: var(--text-dim); line-height: 1.6;">
+                                Move skill instructions to the <strong>system prompt</strong> at initialization, not as user messages on invocation. This gives skills the authority level they need for 100% compliance.
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -891,75 +1041,41 @@ Always wrap PDF operations in try/catch...
     </div>
 
     <script>
-        // Embedded sample data
-        const EMBEDDED_DATA = {
-            research_date: "2026-01-28",
-            tool_used: "Claude Code Router",
-            findings: {
-                system_prompt: { contains_skill_instructions: false, size_kb: 150, cached: true },
-                skill_metadata: { location: "tools[].Skill.description", size_kb: 12 },
-                skill_content_injection: { role: "user", size_kb: 18, wrapper: "<system-reminder>" }
-            }
-        };
-
         // Tab switching
-        document.querySelectorAll('.data-tab').forEach(tab => {
+        document.querySelectorAll('.detail-tab').forEach(tab => {
             tab.addEventListener('click', () => {
-                document.querySelectorAll('.data-tab').forEach(t => t.classList.remove('active'));
-                document.querySelectorAll('.data-view').forEach(v => v.classList.remove('active'));
+                document.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.detail-view').forEach(v => v.classList.remove('active'));
                 tab.classList.add('active');
-                document.getElementById(tab.dataset.view).classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
             });
         });
 
-        // File loading
-        const dataSource = document.getElementById('data-source');
-        const fileInput = document.getElementById('file-input');
-        const dataSourceLabel = document.getElementById('data-source-label');
-
-        function loadData(source, content = null) {
-            if (content) {
-                try {
-                    const data = JSON.parse(content);
-                    updateDisplay(data, source);
-                } catch (e) {
-                    console.error('Parse error:', e);
-                }
-            } else if (source === 'embedded') {
-                updateDisplay(EMBEDDED_DATA, 'embedded_demo');
-            } else {
-                fetch(source)
-                    .then(r => r.ok ? r.text() : Promise.reject('Not found'))
-                    .then(text => loadData(source, text))
-                    .catch(() => {
-                        updateDisplay(EMBEDDED_DATA, 'embedded_demo (fallback)');
-                    });
-            }
-        }
-
-        function updateDisplay(data, source) {
-            dataSourceLabel.textContent = source;
-            if (data.findings) {
-                const f = data.findings;
-                if (f.system_prompt?.size_kb) document.getElementById('stat-system').textContent = '~' + f.system_prompt.size_kb + 'KB';
-                if (f.skill_metadata?.size_kb) document.getElementById('stat-metadata').textContent = '~' + f.skill_metadata.size_kb + 'KB';
-                if (f.skill_content_injection?.size_kb) document.getElementById('stat-injection').textContent = '~' + f.skill_content_injection.size_kb + 'KB';
-            }
-        }
-
-        dataSource.addEventListener('change', (e) => loadData(e.target.value));
-
-        fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (ev) => loadData(file.name, ev.target.result);
-                reader.readAsText(file);
-            }
+        // Expandable API request box
+        document.querySelectorAll('[data-expand]').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.dataset.expand;
+                const content = document.getElementById(targetId);
+                content.classList.toggle('open');
+                this.classList.toggle('open');
+            });
         });
 
-        // Initialize
-        loadData('embedded');
+        // Auto-expand on load
+        setTimeout(() => {
+            const expandBtn = document.querySelector('[data-expand]');
+            if (expandBtn) {
+                expandBtn.click();
+            }
+        }, 300);
+
+        // Section clicks for future expandability
+        document.querySelectorAll('.api-section').forEach(section => {
+            section.addEventListener('click', function() {
+                const sectionType = this.dataset.section;
+                // Could expand to show more details based on section type
+            });
+        });
     </script>
 </body>
 </html>
