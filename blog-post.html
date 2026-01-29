@@ -14,6 +14,15 @@
     <!-- Marked.js for markdown parsing -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
+    <!-- Prism.js for syntax highlighting -->
+    <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-xml-doc.min.js"></script>
+
     <style>
         :root {
             --bg: #ffffff;
@@ -205,11 +214,32 @@
         }
 
         /* macOS-style Code Blocks */
+        #content pre[class*="language-"] {
+            background: var(--code-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 2rem 0;
+            padding: 0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        #content pre[class*="language-"]::before {
+            content: '';
+            display: block;
+            padding: 12px 16px;
+            background: #313244;
+            border-bottom: 1px solid #45475a;
+            background-image: url("data:image/svg+xml,%3Csvg width='54' height='14' viewBox='0 0 54 14' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='7' cy='7' r='5' fill='%23ff5f57'/%3E%3Ccircle cx='27' cy='7' r='5' fill='%23febc2e'/%3E%3Ccircle cx='47' cy='7' r='5' fill='%2328c840'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: 16px center;
+        }
+
         #content pre {
             background: var(--code-bg);
             border-radius: 12px;
             overflow: hidden;
             margin: 2rem 0;
+            padding: 0;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
 
@@ -224,15 +254,55 @@
             background-position: 16px center;
         }
 
-        #content pre code {
+        #content pre code,
+        #content pre code[class*="language-"] {
             display: block;
             padding: 1.25rem 1.5rem;
-            background: none;
+            background: none !important;
             color: var(--code-text);
+            font-family: 'JetBrains Mono', monospace;
             font-size: 0.875rem;
             line-height: 1.6;
             overflow-x: auto;
         }
+
+        /* Prism syntax highlighting colors - Catppuccin Mocha inspired */
+        .token.comment,
+        .token.prolog,
+        .token.doctype,
+        .token.cdata { color: #6c7086; }
+
+        .token.punctuation { color: #cdd6f4; }
+
+        .token.property,
+        .token.tag,
+        .token.boolean,
+        .token.number,
+        .token.constant,
+        .token.symbol { color: #fab387; }
+
+        .token.selector,
+        .token.attr-name,
+        .token.string,
+        .token.char,
+        .token.builtin { color: #a6e3a1; }
+
+        .token.operator,
+        .token.entity,
+        .token.url,
+        .language-css .token.string,
+        .style .token.string { color: #89dceb; }
+
+        .token.atrule,
+        .token.attr-value,
+        .token.keyword { color: #cba6f7; }
+
+        .token.function,
+        .token.class-name { color: #89b4fa; }
+
+        .token.regex,
+        .token.important,
+        .token.variable { color: #f38ba8; }
 
         /* Tables */
         #content table {
@@ -499,6 +569,9 @@
                 const contentEl = document.getElementById('content');
                 contentEl.innerHTML = html;
                 contentEl.classList.remove('loading');
+
+                // Apply syntax highlighting
+                Prism.highlightAll();
 
             } catch (error) {
                 console.error('Failed to load blog-post.md:', error);
